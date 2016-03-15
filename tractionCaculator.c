@@ -21,6 +21,82 @@ float dragForce[8][120];
 float brakeForce[8][120];
 
 // 初始化
+LOCOPARAMETER* initLocoInfo() {
+	LOCOPARAMETER* locoInfoPtr = (LOCOPARAMETER*) malloc(sizeof(LOCOPARAMETER));
+	
+	locoInfoPtr->count = 56;
+	locoInfoPtr->weight[0] = 0;
+	locoInfoPtr->totalWeight = locoInfoPtr->weight[0] + 5000;
+	locoInfoPtr->weight[1] = locoInfoPtr->totalWeight / locoInfoPtr->count;
+	locoInfoPtr->length[0] = 0;
+	locoInfoPtr->totalLength = locoInfoPtr->length[0] + 69.8;
+	locoInfoPtr->length[1] = locoInfoPtr->length[0] / locoInfoPtr->count;
+	locoInfoPtr->davis[0] = 0.0001;
+	locoInfoPtr->davis[1] = -0.0104;
+	locoInfoPtr->davis[2] = 1.3889;
+	locoInfoPtr->dragConsumption[0] = 0.0211550441452778;
+	locoInfoPtr->dragConsumption[1] = 0.0385553514500000;
+	locoInfoPtr->dragConsumption[2] = 0.0729779724177778;
+	locoInfoPtr->dragConsumption[3] = 0.103948251458333;
+	locoInfoPtr->dragConsumption[4] = 0.138471670730556;
+	locoInfoPtr->dragConsumption[5] = 0.182041737826667;
+	locoInfoPtr->dragConsumption[6] = 0.221756269777778;
+	locoInfoPtr->dragConsumption[7] = 0.279589296952778;
+	locoInfoPtr->idleConsumption = 0.00516591310277778;
+	locoInfoPtr->brakeConsumption[0] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[1] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[2] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[3] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[4] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[5] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[6] = 0.00812686329583333;
+	locoInfoPtr->brakeConsumption[7] = 0.00812686329583333;
+
+	return locoInfoPtr;
+}
+
+OPTCONSTPARAM* initOptConst() {
+	OPTCONSTPARAM* optConstPtr = (OPTCONSTPARAM*) malloc(sizeof(OPTCONSTPARAM));
+	
+	optConstPtr->G = 9.8;
+	optConstPtr->PRECISION = 0.000001;
+	optConstPtr->EMPTYINTERVAL = 3.0;
+	optConstPtr->LIMIT_INTERVAL = 8;
+	optConstPtr->DELTA_S = 5.0;
+	optConstPtr->TSTEP = 0.5;
+	optConstPtr->SSTEP = 1.0;
+	optConstPtr->MAXV = 72.0;
+	optConstPtr->AIRLENGTH = 1000.0;
+	optConstPtr->MAXLENGTH = 1000.0;
+	optConstPtr->LIMITV = 75.0;
+	optConstPtr->MINV = 20.0;
+	optConstPtr->MAXGEAR = 8;
+	optConstPtr->MINGEAR = -6;
+	optConstPtr->AIRS = -10;
+	optConstPtr->AIRE = -9;
+	optConstPtr->DISTANCE = 100;
+	optConstPtr->FEATUREINVALID = 100;
+	optConstPtr->LIMITTHRESHOLD = 380;
+	optConstPtr->THROUGHEXPERT = -11;
+	optConstPtr->PUSHERENGINE = -12;
+	optConstPtr->COMGEARSTEP = 1.0;
+	optConstPtr->IDELGEARSTEP = 1.0;
+	optConstPtr->NEARLIMIT = 8.0;
+	optConstPtr->POSTINITLENGTH = 10000;
+	optConstPtr->GEARLENGTHLIMIT = 200;
+	optConstPtr->TMPSPEEDACCURACY = 0.1;
+	optConstPtr->MAXDRAG = 50;
+	optConstPtr->RAWOPT_V_INTERVAL = 1.0;
+	optConstPtr->MAX_ADJUST_V = 5.0;
+	optConstPtr->PERCENTAGE_OF_DISTANCE = 0.6;
+	optConstPtr->QUICK_RISE_GEAR = 8;
+	optConstPtr->QUICK_DROP_GEAR = 6;
+	optConstPtr->CATCH_UP_LEN_INTERVAL = 1000.0;
+	optConstPtr->MAX_TIME_DIFF = 2;
+	
+	return optConstPtr;
+}
+
 int initModel(LOCOPARAMETER* locoInfoPtr, OPTCONSTPARAM* optConstPtr) {
 
 	locoInfo = *locoInfoPtr;

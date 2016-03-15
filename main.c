@@ -50,7 +50,10 @@ int main() {
 		printf("\n");
 	}
 */
-	initModel();
+
+	LOCOPARAMETER* locoInfoPtr = initLocoInfo();
+	OPTCONSTPARAM* optConstPtr = initOptConst();
+	initModel(locoInfoPtr, optConstPtr);
 
 	return 0;
 }

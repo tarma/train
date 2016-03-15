@@ -137,6 +137,8 @@ void readDragAndBrakeForce();
 void dispose();
 
 // 初始化
+LOCOPARAMETER* initLocoInfo();
+OPTCONSTPARAM* initOptConst();
 int initModel(LOCOPARAMETER* locoInfoPtr, OPTCONSTPARAM* optConstPtr);
 
 // Debug使用
