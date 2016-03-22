@@ -51,6 +51,8 @@ struct mGradient {
 };
 typedef struct mGradient MGRADIENT;
 
+extern MGRADIENT* mGradients;
+
 /**
  * 优化中用到的常量值，从配置文件中读取
  */

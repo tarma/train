@@ -3,57 +3,67 @@
 #include <time.h>
 #include "tractionCaculator.h"
 
+#define tStep 0.5
+#define gamma 0.8
+#define alpha 1
+
 int main() {
-	/*int R[6][6] = {{-1, -1, -1, -1, 0, -1}, {-1, -1, -1, 0, -1, 100}, {-1, -1, -1, 0, -1, -1}, {-1, 0, 0, -1, 0, -1}, {0, -1, -1, 0, -1, 100}, {-1, 0, -1, -1, 0, 100}};
-	int Q[6][6] = {0};
+	float Q[11][3] = {0};
 	int i, j, times;
-	int change;
-	int temp[6] = {0};
-	int temp_len;
+	int count = 0;
 
 	srand(time(NULL));
-
-	for (times = 0; times < 1000; times++) {
-		 int state = rand() % 6;
-		 do {	
-			temp_len = 0;
-			double p = (double) rand() / RAND_MAX;
-			int maxn;
-			int max = -1;
-			for (i = 0; i < 6; i++) {
-				if (R[state][i] >= 0) {
-					temp[temp_len] = i;
-					temp_len++;
-				}
-				if (Q[state][i] > max) {
-					maxn = i;
-					max = Q[state][i];
-				}
-			}
-
-			maxn = temp[rand() % temp_len];
-			max = -1;
-			for (i = 0; i < 6; i++) {
-				if (R[maxn][i] >= 0 && Q[maxn][i] > max) {
-					max = Q[maxn][i];
-				}
-			}
-			Q[state][maxn] = R[state][maxn] + 0.8 * max;
-			state = maxn;
-		 } while (state != 5);
-	}
-
-	for (i = 0; i < 6; i++) {
-		for (j = 0; j < 6; j++) {
-			printf("%d ", Q[i][j]);
-		}
-		printf("\n");
-	}
-*/
 
 	LOCOPARAMETER* locoInfoPtr = initLocoInfo();
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
+
+	for (times = 0; times < 10000; times++) {
+		 int state = 0;
+		 float s = mGradients[0].start;
+		 int gear = 0;
+		 float velocity = 0;
+		 do {
+		 	int action;
+		 	if (gear == 8) {
+				action = rand() % 2;
+			} else if (gear == -8) {
+				action = rand() % 2 + 1;
+			} else {
+				action = rand() % 3;
+			}
+			float delta_s;
+			float delta_v;
+			float delta_e;
+			int next_state = state;
+
+			gear += action - 1;
+			DoCaculateByTime(s, velocity, gear, tStep, &count, &delta_s, &delta_v, &delta_e);
+			if (s + delta_s > mGradients[state].end) {
+				next_state++;
+			}
+			float max = Q[next_state][0];
+			for (i = 1; i < 3; i++) {
+				if (Q[next_state][i] > max) {
+					max = Q[next_state][i];
+				}
+			}
+
+			Q[state][action] = -delta_e + gamma * max;
+			state = next_state;
+			s += delta_s;
+			velocity += delta_v;
+		 } while (s < 81868 && s >= 79793);
+	}
+
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 3; j++) {
+			printf("%f ", Q[i][j]);
+		}
+		printf("\n");
+	}
+
+	dispose();
 
 	return 0;
 }
