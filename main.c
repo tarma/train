@@ -3,7 +3,7 @@
 #include <time.h>
 #include "tractionCaculator.h"
 
-#define tStep 0.5
+#define tStep 1
 #define gamma 0.8
 #define alpha 1
 
@@ -18,10 +18,10 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 10; times++) {
+	for (times = 0; times < 1; times++) {
 		 int state = 0;
 		 float s = mGradients[0].start;
-		 int gear = 0;
+		 int gear = 6;
 		 float velocity = 0;
 		 do {
 		 	int action;
@@ -40,9 +40,9 @@ int main() {
 						action = 1;
 					}
 				} else {
-					float max = Q[state][0];
-					action = 0;
-					for (i = 1; i < 2; i++) {
+					float max = Q[state][2];
+					action = 2;
+					for (i = 0; i < 1; i++) {
 						if (Q[state][i] > max) {
 							action = i;
 							max = Q[state][i];
@@ -63,10 +63,10 @@ int main() {
 			float delta_e;
 			int next_state = state;
 
-			printf("%d %d %f\n", gear, action, p);
-
 			gear += action - 1;
 			DoCaculateByTime(s, velocity, gear, tStep, &count, &delta_s, &delta_v, &delta_e);
+			printf("%f %f %f", delta_s, delta_v, delta_e);
+			break;
 			if (s + delta_s > mGradients[state].end) {
 				next_state++;
 			}
@@ -77,13 +77,18 @@ int main() {
 				}
 			}
 			Q[state][action] = -delta_e + gamma * max;
-			if (delta_s < 0) {
+			if (delta_s < 0 || velocity < 0) {
 				Q[state][action] -= 100;
 				break;
 			}
+			/*for (j = 0; j < 3; j++) {
+				printf("%f ", Q[0][j]);
+			}*/
+
 			state = next_state;
 			s += delta_s;
 			velocity += delta_v;
+			//printf("%d %d %f %f %f %f\n", gear, action - 1, delta_s, s, delta_v, velocity);
 		 } while (s < 81868);
 	}
 
