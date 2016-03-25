@@ -7,9 +7,11 @@
 #define gamma 0.8
 #define alpha 1
 
+int velocityToLevel(float v);
+
 int main() {
-	float Q[11][3] = {0};
-	int i, j, times;
+	float Q[11][5][3] = {0};
+	int i, j, times, k;
 	int count = 0;
 
 	srand(time(NULL));
@@ -18,34 +20,35 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 1; times++) {
+	for (times = 0; times < 100; times++) {
 		 int state = 0;
 		 float s = mGradients[0].start;
 		 int gear = 6;
 		 float velocity = 0;
 		 do {
 		 	int action;
+			int level = velocityToLevel(velocity);
 			float p = (float) rand() / RAND_MAX;
 			if (p > 0.1) {
 			 	if (gear == 8) {
-					if (Q[state][0] < Q[state][1]) {
-						action = 1;
-					} else {
+					if (Q[state][level][0] > Q[state][level][1]) {
 						action = 0;
+					} else {
+						action = 1;
 					}
 				} else if (gear == -8) {
-					if (Q[state][1] < Q[state][2]) {
-						action = 2;
-					} else {
+					if (Q[state][level][1] > Q[state][level][2]) {
 						action = 1;
+					} else {
+						action = 2;
 					}
 				} else {
-					float max = Q[state][2];
+					float max = Q[state][level][2];
 					action = 2;
-					for (i = 0; i < 1; i++) {
-						if (Q[state][i] > max) {
+					for (i = 0; i < 2; i++) {
+						if (Q[state][level][i] > max) {
 							action = i;
-							max = Q[state][i];
+							max = Q[state][level][i];
 						}
 					}
 				}
@@ -65,36 +68,39 @@ int main() {
 
 			gear += action - 1;
 			DoCaculateByTime(s, velocity, gear, tStep, &count, &delta_s, &delta_v, &delta_e);
-			printf("%f %f %f", delta_s, delta_v, delta_e);
-			break;
 			if (s + delta_s > mGradients[state].end) {
 				next_state++;
 			}
-			float max = Q[next_state][0];
+			velocity += delta_v;
+			int next_level = velocityToLevel(velocity);
+			float max = Q[next_state][next_level][0];
 			for (i = 1; i < 3; i++) {
-				if (Q[next_state][i] > max) {
-					max = Q[next_state][i];
+				if (Q[next_state][next_level][i] > max) {
+					max = Q[next_state][next_level][i];
 				}
 			}
-			Q[state][action] = -delta_e + gamma * max;
-			if (delta_s < 0 || velocity < 0) {
-				Q[state][action] -= 100;
+			Q[state][level][action] = -delta_e + gamma * max;
+			if (velocity < 0) {
+				Q[state][level][action] -= 100;
+			}
+
+			if (s + delta_s < mGradients[state].start) {
+				Q[state][level][action] -= 200;
 				break;
 			}
-			/*for (j = 0; j < 3; j++) {
-				printf("%f ", Q[0][j]);
-			}*/
 
 			state = next_state;
 			s += delta_s;
 			velocity += delta_v;
-			//printf("%d %d %f %f %f %f\n", gear, action - 1, delta_s, s, delta_v, velocity);
 		 } while (s < 81868);
 	}
 
 	for (i = 0; i < 10; i++) {
 		for (j = 0; j < 3; j++) {
-			printf("%f ", Q[i][j]);
+			for (k = 0; k < 5; k++) {
+				printf("%f ", Q[i][k][j]);
+			}
+			printf("\n");
 		}
 		printf("\n");
 	}
@@ -102,4 +108,14 @@ int main() {
 	dispose();
 
 	return 0;
+}
+
+int velocityToLevel(float v) {
+	if (v < 0) {
+		return 0;
+	}
+	if (v / 10 < 3) {
+		return (int) v / 10 + 1;
+	}
+	return 4;
 }
