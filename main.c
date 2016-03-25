@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include "tractionCaculator.h"
 
 #define tStep 1
@@ -20,13 +21,13 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 100; times++) {
-		 int state = 0;
-		 float s = mGradients[0].start;
-		 int gear = 6;
-		 float velocity = 0;
-		 do {
-		 	int action;
+	for (times = 0; times < 10000; times++) {
+		int state = 0;
+		float s = mGradients[0].start;
+		int gear = 6;
+		float velocity = 0;
+		do {
+			int action;
 			int level = velocityToLevel(velocity);
 			float p = (float) rand() / RAND_MAX;
 			if (p > 0.1) {
@@ -82,6 +83,7 @@ int main() {
 			Q[state][level][action] = -delta_e + gamma * max;
 			if (velocity < 0) {
 				Q[state][level][action] -= 100;
+				break;
 			}
 
 			if (s + delta_s < mGradients[state].start) {
@@ -92,7 +94,7 @@ int main() {
 			state = next_state;
 			s += delta_s;
 			velocity += delta_v;
-		 } while (s < 81868);
+		} while (s < 81868);
 	}
 
 	for (i = 0; i < 10; i++) {
