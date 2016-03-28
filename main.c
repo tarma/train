@@ -21,7 +21,7 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 10000; times++) {
+	for (times = 0; times < 3000000; times++) {
 		int state = 0;
 		float s = mGradients[0].start;
 		int gear = 6;
@@ -86,15 +86,9 @@ int main() {
 				break;
 			}
 
-			if (s + delta_s < mGradients[state].start) {
-				Q[state][level][action] -= 200;
-				break;
-			}
-
 			state = next_state;
 			s += delta_s;
-			velocity += delta_v;
-		} while (s < 81868);
+		} while (s < mGradients[9].end);
 	}
 
 	for (i = 0; i < 10; i++) {
@@ -113,11 +107,8 @@ int main() {
 }
 
 int velocityToLevel(float v) {
-	if (v < 0) {
-		return 0;
-	}
-	if (v / 10 < 3) {
-		return (int) v / 10 + 1;
+	if (v / 10 < 4) {
+		return (int) v / 10;
 	}
 	return 4;
 }
