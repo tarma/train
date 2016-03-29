@@ -145,6 +145,8 @@ void getForce(int gear, float v, float *force) {
 
 	int v1 = roundInt(v); //对v进行四舍五入
 
+	if (v1 == 0) v1 = 1;
+
 	if (gear < 0) {
 		*force = -brakeForce[abs(gear) - 1][v1 - 1];
 	} else {

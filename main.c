@@ -8,7 +8,7 @@
 #define gamma 0.8
 #define alpha 1
 
-int velocityToLevel(float v);
+int velocityToLevel(float velocity);
 
 int main() {
 	float Q[11][5][3] = {0};
@@ -21,10 +21,10 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 3000000; times++) {
+	for (times = 0; times < 10000000; times++) {
 		int state = 0;
 		float s = mGradients[0].start;
-		int gear = 6;
+		int gear = 0;
 		float velocity = 0;
 		do {
 			int action;
@@ -81,8 +81,8 @@ int main() {
 				}
 			}
 			Q[state][level][action] = -delta_e + gamma * max;
-			if (velocity < 0) {
-				Q[state][level][action] -= 100;
+			if ((int) (velocity + 0.5) < 0) {
+				Q[state][level][action] -= 2;
 				break;
 			}
 
@@ -106,9 +106,10 @@ int main() {
 	return 0;
 }
 
-int velocityToLevel(float v) {
+int velocityToLevel(float velocity) {
+	int v = (int) (velocity + 0.5);
 	if (v / 10 < 4) {
-		return (int) v / 10;
+		return v / 10;
 	}
 	return 4;
 }
