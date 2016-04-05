@@ -5,7 +5,7 @@ exec: $(TARGET)
 	gcc -o exec $(TARGET)
 
 %.o: %.c
-	gcc -g -c $<
+	gcc -c $<
 
 clean:
 	rm -f $(TARGET)
