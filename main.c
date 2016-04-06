@@ -7,8 +7,8 @@
 #define tStep 0.5 
 #define gamma 0.8
 #define alpha 1
-#define epsilon 0.8
-#define blame -10
+#define epsilon 0.1
+#define blame 10
 
 int velocityToLevel(float velocity);
 
@@ -67,6 +67,7 @@ int main() {
 			float delta_s;
 			float delta_v;
 			float delta_e;
+			float reward = 0;
 			int next_state = state;
 			int new_gear = gear + action - 1;
 
@@ -97,12 +98,14 @@ int main() {
 					}
 				}
 			}
-			Q[state][level][gear + 8] += alpha * (-delta_e + gamma * max - Q[state][level][gear + 8]);
+			reward += -delta_e + delta_s;
 			if ((int) (velocity + 0.5) < 0) {
-				Q[state][level][gear + 8] += blame;
+				reward -= blame;
+				Q[state][level][gear + 8] += alpha * (reward + gamma * max - Q[state][level][gear + 8]);
 				break;
 			}
-
+			Q[state][level][gear + 8] += alpha * (reward + gamma * max - Q[state][level][gear + 8]);
+			
 			state = next_state;
 			s += delta_s;
 			gear = new_gear;
