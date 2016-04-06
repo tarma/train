@@ -7,7 +7,7 @@
 #define tStep 0.5 
 #define gamma 0.8
 #define alpha 1
-#define epsilon 0.1
+#define epsilon 0.8
 #define blame -10
 
 int velocityToLevel(float velocity);
@@ -23,7 +23,7 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 10000000; times++) {
+	for (times = 0; times < 1000000; times++) {
 		int state = 0;
 		float s = mGradients[0].start;
 		int gear = 0;
@@ -110,6 +110,7 @@ int main() {
 	}
 
 	for (i = 0; i < 20; i++) {
+		printf("%d\n", i + 1);
 		for (j = 0; j < 17; j++) {
 			for (k = 0; k < 5; k++) {
 				printf("%f ", Q[i][k][j]);
