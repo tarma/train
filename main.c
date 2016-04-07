@@ -13,7 +13,7 @@
 int velocityToLevel(float velocity);
 
 int main() {
-	float Q[21][5][17] = {0};
+	float Q[31][5][17] = {0};
 	int i, j, times, k;
 	int count = 0;
 
@@ -98,7 +98,7 @@ int main() {
 					}
 				}
 			}
-			reward += -delta_e + delta_s;
+			reward += delta_s / delta_e;
 			if ((int) (velocity + 0.5) < 0) {
 				reward -= blame;
 				Q[state][level][gear + 8] += alpha * (reward + gamma * max - Q[state][level][gear + 8]);
@@ -109,10 +109,10 @@ int main() {
 			state = next_state;
 			s += delta_s;
 			gear = new_gear;
-		} while (s < mGradients[19].end);
+		} while (s < mGradients[29].end);
 	}
 
-	for (i = 0; i < 20; i++) {
+	for (i = 0; i < 30; i++) {
 		printf("%d\n", i + 1);
 		for (j = 0; j < 17; j++) {
 			for (k = 0; k < 5; k++) {
