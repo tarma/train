@@ -6,16 +6,17 @@
 
 #define tStep 0.5 
 #define gamma 0.8
-#define alpha 1
+#define alpha 0.5
 #define epsilon 0.1
-#define blame 10
+#define blame 50
 
 int velocityToLevel(float velocity);
 
 int main() {
-	float Q[31][5][17] = {0};
+	float Q[51][12][17] = {0};
 	int i, j, times, k;
 	int count = 0;
+	FILE *fout = fopen("result", "w+");
 
 	srand(time(NULL));
 
@@ -23,7 +24,7 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 1000000; times++) {
+	for (times = 0; times < 100000; times++) {
 		int state = 0;
 		float s = mGradients[0].start;
 		int gear = 0;
@@ -109,29 +110,30 @@ int main() {
 			state = next_state;
 			s += delta_s;
 			gear = new_gear;
-		} while (s < mGradients[29].end);
+		} while (s < mGradients[49].end);
 	}
 
-	for (i = 0; i < 30; i++) {
-		printf("%d\n", i + 1);
+	for (i = 0; i < 50; i++) {
+		fprintf(fout, "%d\n", i + 1);
 		for (j = 0; j < 17; j++) {
-			for (k = 0; k < 5; k++) {
-				printf("%f ", Q[i][k][j]);
+			for (k = 0; k < 12; k++) {
+				fprintf(fout, "%f ", Q[i][k][j]);
 			}
-			printf("\n");
+			fprintf(fout, "\n");
 		}
-		printf("\n");
+		fprintf(fout, "\n");
 	}
 
 	dispose();
+	fclose(fout);
 
 	return 0;
 }
 
 int velocityToLevel(float velocity) {
 	int v = (int) (velocity + 0.5);
-	if (v / 10 < 4) {
+	if (v / 10 < 12) {
 		return v / 10;
 	}
-	return 4;
+	return 11;
 }
