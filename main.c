@@ -8,7 +8,7 @@
 #define gamma 0.8
 #define alpha 0.5
 #define epsilon 0.1
-#define blame 50
+#define blame 500
 
 int velocityToLevel(float velocity);
 
@@ -17,6 +17,11 @@ int main() {
 	int i, j, times, k;
 	int count = 0;
 	FILE *fout = fopen("result", "w+");
+	FILE *result = fopen("gear_result", "w+");
+	float s;
+	int gear, new_gear;
+	float velocity;
+	int state;
 
 	srand(time(NULL));
 
@@ -24,11 +29,11 @@ int main() {
 	OPTCONSTPARAM* optConstPtr = initOptConst();
 	initModel(locoInfoPtr, optConstPtr);
 
-	for (times = 0; times < 100000; times++) {
-		int state = 0;
-		float s = mGradients[0].start;
-		int gear = 0;
-		float velocity = 0;
+	for (times = 0; times < 500000; times++) {
+		state = 0;
+		s = mGradients[0].start;
+		gear = 0;
+		velocity = 0;
 		do {
 			int action;
 			int level = velocityToLevel(velocity);
@@ -70,10 +75,10 @@ int main() {
 			float delta_e;
 			float reward = 0;
 			int next_state = state;
-			int new_gear = gear + action - 1;
+			new_gear = gear + action - 1;
 
 			DoCaculateByTime(s, velocity, new_gear, tStep, &count, &delta_s, &delta_v, &delta_e);
-			if (s + delta_s > mGradients[state].end) {
+			while (s + delta_s > mGradients[next_state].end) {
 				next_state++;
 			}
 			velocity += delta_v;
@@ -124,8 +129,58 @@ int main() {
 		fprintf(fout, "\n");
 	}
 
+	s = mGradients[0].start;
+	gear = 0;
+	velocity = 0;
+	state = 0;
+
+	printf("learn complete\n");
+
+	while (s < mGradients[49].end) {
+		int level = velocityToLevel(velocity);
+		if (gear == 8) {
+			if (Q[state][level][15] > Q[state][level][16]) {
+				gear = 7;
+			} else {
+				gear = 8;
+			}
+		} else if (gear == -8) {
+			if (Q[state][level][0] > Q[state][level][1]) {
+				gear = -8;
+			} else {
+				gear = -7;
+			}
+		} else {
+			float max = Q[state][level][gear + 9];
+			new_gear = gear + 1;
+			for (i = gear + 7; i < gear + 9; i++) {
+				if (Q[state][level][i] > max) {
+					new_gear = i - 8;
+					max = Q[state][level][i];
+				}
+			}
+			gear = new_gear;
+		}
+		float delta_s;
+		float delta_e;
+		float delta_v;
+		int next_state = state;
+		DoCaculateByTime(s, velocity, gear, tStep, &count, &delta_s, &delta_v, &delta_e);
+		while (s + delta_s > mGradients[next_state].end) {
+			next_state++;
+		}
+		velocity += delta_v;
+		if ((int) (velocity + 0.5) < 0) {
+			fprintf(result, "fail!\n");
+			break;
+		}
+		s += delta_s;
+		fprintf(result, "%f\t%f\t%d\t0.5\n", s, velocity, gear);
+	}
+
 	dispose();
 	fclose(fout);
+	fclose(result);
 
 	return 0;
 }
