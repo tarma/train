@@ -6,9 +6,9 @@
 
 #define tStep 0.5 
 #define gamma 0.8
-#define alpha 0.5
+#define alpha 1
 #define epsilon 0.1
-#define blame 1000
+#define blame 10
 
 int velocityToLevel(float velocity);
 
@@ -104,7 +104,7 @@ int main() {
 					}
 				}
 			}
-			reward += delta_s / delta_e;
+			reward += delta_s * 2 - delta_e * 8;
 			if ((int) (velocity + 0.5) < 0) {
 				reward -= blame;
 				Q[state][level][gear + 8] += alpha * (reward + gamma * max - Q[state][level][gear + 8]);
@@ -138,28 +138,19 @@ int main() {
 
 	while (s < mGradients[49].end) {
 		int level = velocityToLevel(velocity);
-		if (gear == 8) {
-			if (Q[state][level][15] > Q[state][level][16]) {
-				gear = 7;
-			} else {
-				gear = 8;
+		float max = Q[state][level][0];
+		int target_gear = -8;
+		for (i = 1; i < 17; i++) {
+			if (Q[state][level][i] > max) {
+				target_gear = i - 8;
+				max = Q[state][level][i];
 			}
-		} else if (gear == -8) {
-			if (Q[state][level][0] > Q[state][level][1]) {
-				gear = -8;
-			} else {
-				gear = -7;
-			}
-		} else {
-			float max = Q[state][level][gear + 9];
-			new_gear = gear + 1;
-			for (i = gear + 7; i < gear + 9; i++) {
-				if (Q[state][level][i] > max) {
-					new_gear = i - 8;
-					max = Q[state][level][i];
-				}
-			}
-			gear = new_gear;
+		}
+		if (target_gear > gear) {
+			gear++;
+		}
+		if (target_gear < gear) {
+			gear--;
 		}
 		float delta_s;
 		float delta_e;
