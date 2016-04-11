@@ -8,12 +8,12 @@
 #define gamma 0.8
 #define alpha 0.5
 #define epsilon 0.1
-#define blame 500
+#define blame 1000
 
 int velocityToLevel(float velocity);
 
 int main() {
-	float Q[51][12][17] = {0};
+	float Q[51][24][17] = {0};
 	int i, j, times, k;
 	int count = 0;
 	FILE *fout = fopen("result", "w+");
@@ -121,7 +121,7 @@ int main() {
 	for (i = 0; i < 50; i++) {
 		fprintf(fout, "%d\n", i + 1);
 		for (j = 0; j < 17; j++) {
-			for (k = 0; k < 12; k++) {
+			for (k = 0; k < 24; k++) {
 				fprintf(fout, "%f ", Q[i][k][j]);
 			}
 			fprintf(fout, "\n");
@@ -187,8 +187,8 @@ int main() {
 
 int velocityToLevel(float velocity) {
 	int v = (int) (velocity + 0.5);
-	if (v / 10 < 12) {
-		return v / 10;
+	if (v / 5 < 24) {
+		return v / 5;
 	}
-	return 11;
+	return 23;
 }
