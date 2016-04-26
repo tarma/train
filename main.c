@@ -3,6 +3,7 @@
 #include <time.h>
 #include <math.h>
 #include "tractionCaculator.h"
+#include "read_binary_for_route.h"
 
 #define tStep 0.5 
 #define gamma 0.8
@@ -23,17 +24,22 @@ int main() {
 	float s;
 	int gear, new_gear;
 	float velocity;
-	int state;
+	int state, limit_state;
 
 	srand(time(NULL));
 
 	LOCOPARAMETER* locoInfoPtr = initLocoInfo();
 	OPTCONSTPARAM* optConstPtr = initOptConst();
+	int lim_len;
+	struct limit_t *lim = (struct limit_t *) read_binary_file(0x03, &lim_len);
+	int sta_len;
+	struct station_t *sta = (struct station_t *) read_binary_file(0x05, &sta_len);
 	initModel(locoInfoPtr, optConstPtr);
 	
 
 	for (times = 0; times < LEARN_TIMES; times++) {
 		state = 0;
+		limit_state = 0;
 		s = mGradients[0].start;
 		gear = 0;
 		velocity = 0;
