@@ -11,7 +11,8 @@
 #define epsilon 0.1
 #define blame 10
 #define STATE_NUM 979 
-#define LEARN_TIMES 10000000
+#define LEARN_TIMES 10000
+#define LIMIT_BLAME 10
 
 int velocityToLevel(float velocity);
 
@@ -24,7 +25,7 @@ int main() {
 	float s;
 	int gear, new_gear;
 	float velocity;
-	int state, limit_state;
+	int state, lim_state;
 
 	srand(time(NULL));
 
@@ -39,13 +40,14 @@ int main() {
 
 	for (times = 0; times < LEARN_TIMES; times++) {
 		state = 0;
-		limit_state = 0;
+		lim_state = 0;
 		s = mGradients[0].start;
 		gear = 0;
 		velocity = 0;
 		do {
 			int action;
 			int level = velocityToLevel(velocity);
+			int break_flag = 0;
 			float p = (float) rand() / RAND_MAX;
 			if (p > epsilon) {
 			 	if (gear == 8) {
@@ -90,6 +92,9 @@ int main() {
 			while (next_state < 979 && s + delta_s > mGradients[next_state].end) {
 				next_state++;
 			}
+			while (lim_state < lim_len && s + delta_s > lim[lim_state].end_post) {
+				lim_state++;
+			}
 			velocity += delta_v;
 			int next_level = velocityToLevel(velocity);
 			float max;
@@ -116,11 +121,16 @@ int main() {
 			reward += delta_s - delta_e;
 			if ((int) (velocity + 0.5) < 0) {
 				reward -= blame;
-				Q[state][level][gear + 8] += alpha * (reward + gamma * max - Q[state][level][gear + 8]);
-				break;
+				break_flag = 1;
+			}
+			if (velocity > lim[lim_state].value) {
+				reward -= LIMIT_BLAME;
+				break_flag = 1;
 			}
 			Q[state][level][gear + 8] += alpha * (reward + gamma * max - Q[state][level][gear + 8]);
-			
+			if (break_flag) {
+				break;
+			}
 			state = next_state;
 			s += delta_s;
 			gear = new_gear;
